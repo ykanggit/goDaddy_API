@@ -28,7 +28,12 @@ class GoDaddy:
         logger.debug (f"got {dns_name} record: {resp.json()}")
         return resp
 
-    def set_dns_A_record (self, dns_name:str, ipv4:str) -> None:
+    def set_dns_A_record (self, dns_name:str, ipv4:str, double_check=False) -> None:
+        if double_check:
+            ok=input(f"Are you sure want to add DNS record({dns_name}) to godaddy.com?\nInput <YES> to confirm, any key to abort:")
+            if ok != "YES":
+                logger.debug (f"abort adding DNS record {dns_name}")
+                return
         if not validators.domain(dns_name):
             raise (f"{dns_name} is NOT valid domain")
         if not validators.ipv4(ipv4):
@@ -46,7 +51,12 @@ class GoDaddy:
             raise Exception(f"Fail set {dns_name} DNS record:{resp.text}")
         logger.debug (f"set {ipv4} -> {dns_name}")
 
-    def delete_dns_A_record (self, dns_name:str) -> None:
+    def delete_dns_A_record (self, dns_name:str, double_check=False) -> None:
+        if double_check:
+            ok=input(f"Are you sure want to delete DNS record({dns_name}) from godaddy.com?\nInput <YES> to confirm, any key to abort:")
+            if ok != "YES":
+                logger.debug (f"abort deleting DNS record {dns_name}")
+                return
         if not validators.domain(dns_name):
             raise (f"{dns_name} is NOT valid domain")
         tld = tldextract.extract(dns_name)
@@ -63,8 +73,13 @@ class GoDaddy:
 
 
 if __name__ == '__main__':
+    while True:
+        test_domain_name =input("Input a domain name to test <set/get/delete> API:\n")
+        if validators.domain(test_domain_name):
+            break
+        print (f"{test_domain_name} is not valid domain name")
     g = GoDaddy (api_key=os.environ['GODADDY_API_KEY'], api_secret=os.environ['GODADDY_API_SECRET'])
-    g.set_dns_A_record (dns_name='test.mydomain.com', ipv4='10.1.1.2')
-    g.get_dns_A_records (dns_name='test.mydomain.com')
-    g.delete_dns_A_record (dns_name='test.mydomain.com')
-    g.get_dns_A_records (dns_name='test.mydomain.com')
+    g.set_dns_A_record (dns_name=test_domain_name, ipv4='10.1.1.1', double_check= True)
+    g.get_dns_A_records (dns_name=test_domain_name)
+    g.delete_dns_A_record (dns_name=test_domain_name, double_check=True)
+    g.get_dns_A_records (dns_name=test_domain_name)
