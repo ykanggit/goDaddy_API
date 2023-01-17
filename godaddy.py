@@ -49,7 +49,7 @@ class GoDaddy:
         resp = self.api.put (url=url,json=payload)
         if not resp.ok:
             raise Exception(f"Fail set {dns_name} DNS record:{resp.text}")
-        logger.debug (f"set {ipv4} -> {dns_name}")
+        logger.debug (f"set DNS record: {ipv4} -> {dns_name}")
 
     def delete_dns_A_record (self, dns_name:str, double_check=False) -> None:
         if double_check:
@@ -68,7 +68,15 @@ class GoDaddy:
             logger.debug (f"{dns_name} not found")
         logger.debug (f"Done: deleting {dns_name}")
 
-
+    def ip_for (self, hostname:str):
+        resp = self.get_dns_A_records(hostname)
+        record_list = resp.json()
+        if len(record_list):
+            logger.debug (f"DNS record for {hostname}: {record_list}")
+            return record_list[0]['data']
+        else:
+            logger.debug (f"no DNS record for {hostname}")
+            return None
 
 
 
