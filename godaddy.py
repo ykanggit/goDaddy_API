@@ -64,7 +64,7 @@ class GoDaddy:
 
 if __name__ == '__main__':
     g = GoDaddy (api_key=os.environ['GODADDY_API_KEY'], api_secret=os.environ['GODADDY_API_SECRET'])
-    g.set_dns_A_record (dns_name='test.iooi.life', ipv4='10.1.1.2')
-    g.get_dns_A_records (dns_name='test.iooi.life')
-    g.delete_dns_A_record (dns_name='test.iooi.life')
-    g.get_dns_A_records (dns_name='test.iooi.life')
+    g.set_dns_A_record (dns_name='test.mydomain.com', ipv4='10.1.1.2')
+    g.get_dns_A_records (dns_name='test.mydomain.com')
+    g.delete_dns_A_record (dns_name='test.mydomain.com')
+    g.get_dns_A_records (dns_name='test.mydomain.com')
