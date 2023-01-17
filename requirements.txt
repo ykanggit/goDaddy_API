@@ -1,0 +1,5 @@
+loguru
+rich
+requests
+tldextract
+validators
