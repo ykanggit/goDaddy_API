@@ -1,8 +1,9 @@
-import os
 import requests
 from loguru import logger
 from godaddy import GoDaddy
-from rich import print
+
+from cfg import SLACK_WEBHOOK, GODADDY
+from slack import MSG, ChatBot
 
 
 def my_current_ipv4 () -> str:
@@ -32,14 +33,20 @@ def setup_syslog():
 
 
 if __name__ == "__main__":
-    target ='host.mydomain.com'
-    setup_syslog()
-    g = GoDaddy (api_key=os.environ['GODADDY_API_KEY'], api_secret=os.environ['GODADDY_API_SECRET'])
+    target ='4runner.iooi.life'
+    # on Centos just use syslog directly for cronjob write to /var/log/messages
+    from syslog import syslog
+    # hardcode the keys for cronjob
+    g = GoDaddy (api_key=GODADDY.API_KEY, api_secret=GODADDY.API_SECRET)
     gdip = g.ip_for(target)
     myip = my_current_ipv4()
     logger.debug (f"My current IP({myip}), {target} GoDaddy IP({gdip})")
     if gdip == myip:
         logger.debug ("don't need update DNS record")
-        pass
     else:
         g.set_dns_A_record(dns_name=target, ipv4=myip)
+        txt=f"DNS record updated: {target} -> {myip}"
+        syslog (txt)
+        msg = MSG(text=txt)
+        bot = ChatBot(SLACK_WEBHOOK)
+        bot.send (msg)
