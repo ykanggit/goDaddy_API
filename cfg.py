@@ -1,6 +1,7 @@
+import os
 
-SLACK_WEBHOOK = 'update me'
+SLACK_WEBHOOK = os.environ['SLACK_3510_WEBHOOK']
 
 class GODADDY:
-    API_KEY = 'update me'
-    API_SECRET = 'update me'
+    API_KEY = os.environ['GODADDY_API_KEY']
+    API_SECRET = os.environ['GODADDY_API_SECRET']
