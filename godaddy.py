@@ -7,10 +7,12 @@ from loguru import logger
 from rich import print
 import validators
 
+from cfg import GODADDY
+
 class GoDaddy:
     ''' godaddy.com API
     '''
-    def __init__(self, api_key, api_secret) -> None:
+    def __init__(self, api_key=GODADDY.API_KEY, api_secret=GODADDY.API_SECRET) -> None:
         self.api = requests.Session()
         self.api.headers.update ({'Authorization': f"sso-key {api_key}:{api_secret}"})
         self.api.headers.update ({"content-type": "application/json"})

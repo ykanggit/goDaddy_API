@@ -2,7 +2,7 @@ import requests
 from loguru import logger
 from godaddy import GoDaddy
 
-from cfg import SLACK_WEBHOOK, GODADDY
+from cfg import SLACK_WEBHOOK
 from slack import MSG, ChatBot
 
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     # on Centos just use syslog directly for cronjob write to /var/log/messages
     from syslog import syslog
     # hardcode the keys for cronjob
-    g = GoDaddy (api_key=GODADDY.API_KEY, api_secret=GODADDY.API_SECRET)
+    g = GoDaddy ()
     gdip = g.ip_for(target)
     myip = my_current_ipv4()
     logger.debug (f"My current IP({myip}), {target} GoDaddy IP({gdip})")
