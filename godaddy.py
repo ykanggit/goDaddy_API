@@ -1,5 +1,3 @@
-import os
-
 import requests
 from requests.models import Response
 import tldextract
@@ -88,7 +86,7 @@ if __name__ == '__main__':
         if validators.domain(test_domain_name):
             break
         print (f"{test_domain_name} is not valid domain name")
-    g = GoDaddy (api_key=os.environ['GODADDY_API_KEY'], api_secret=os.environ['GODADDY_API_SECRET'])
+    g = GoDaddy ()
     g.set_dns_A_record (dns_name=test_domain_name, ipv4='10.1.1.1', double_check= True)
     g.get_dns_A_records (dns_name=test_domain_name)
     g.delete_dns_A_record (dns_name=test_domain_name, double_check=True)
