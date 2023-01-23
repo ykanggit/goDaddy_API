@@ -4,3 +4,4 @@ requests
 tldextract
 validators
 boto3
+pydantic

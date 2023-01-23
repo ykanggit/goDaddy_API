@@ -4,8 +4,53 @@ import tldextract
 from loguru import logger
 from rich import print
 import validators
+from pydantic import BaseModel
+from datetime import datetime
+from typing import Optional, List
+import pytz
 
 from cfg import GODADDY
+
+class Domain(BaseModel):
+    createdAt:datetime
+    deletedAt:Optional[datetime]
+    domain:str
+    domainId:int
+    expirationProtected:bool
+    expires:datetime
+    exposeWhois: bool
+    holdRegistrar: bool
+    locked: bool
+    nameServers:Optional[str]=None
+    privacy:bool
+    registrarCreatedAt:datetime
+    renewAuto: bool
+    renewable: bool
+    status:str
+    transferProtected: bool
+
+    def __str__(self) -> str:
+        s = f"{self.domain}" 
+        now = datetime.now(pytz.utc)
+        if self.expires > now:
+            s += f" created({self.createdAt})"
+        else:
+            s += f" expired({self.expires})"
+        return s
+
+class DnsRecord (BaseModel):
+    data:str
+    name:str
+    port:Optional[int]
+    priority:Optional[int]
+    protocol:Optional[str]
+    service:Optional[str]
+    ttl:int
+    type:str
+    weight:Optional[int]
+
+    def __str__(self) -> str:
+        return f"{self.type}: {self.name} ->{self.data}"
 
 class GoDaddy:
     ''' godaddy.com API
@@ -14,6 +59,45 @@ class GoDaddy:
         self.api = requests.Session()
         self.api.headers.update ({'Authorization': f"sso-key {api_key}:{api_secret}"})
         self.api.headers.update ({"content-type": "application/json"})
+    
+    def domains(self, active_only=True)->list:
+        resp = self.api.get(url=f"https://api.godaddy.com/v1/domains")
+        if not resp.ok:
+            raise Exception(resp.text)
+        rc=[]
+        for d in resp.json():
+            o = Domain.parse_obj(d)
+            if active_only:
+                now = datetime.now(pytz.utc)
+                if o.expires <= now:
+                    continue
+            rc.append(o)
+        return rc
+
+    @property
+    def active_domains(self)->List[Domain]:
+        return self.domains()
+
+    @property
+    def all_domains(self)->List[Domain]:
+        return self.domains(active_only=False)
+
+    def list_domain_records(self,domain:str, type:str="*")->List[DnsRecord]:
+        resp = self.api.get(url=f"https://api.godaddy.com/v1/domains/{domain}/records")
+        if not resp.ok:
+            raise Exception(resp.text)
+        rc=[]
+        for j in resp.json():
+            r = DnsRecord.parse_obj(j)
+            if type == "*" or type == r.type:
+                rc.append(r)
+        return rc
+    
+    def one_domain_detail (self, name)->dict:
+        resp = self.api.get(url=f"https://api.godaddy.com/v1/domains/{name}")
+        if not resp.ok:
+            raise Exception(resp.text)
+        return resp.json()
 
     def get_dns_A_records (self, dns_name:str) -> Response:
         ''' input <xyz.com>
