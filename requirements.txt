@@ -5,3 +5,4 @@ tldextract
 validators
 boto3
 pydantic
+pytz
