@@ -75,6 +75,15 @@ class GoDaddy:
         return rc
 
     @property
+    def domain_strs (self) -> list:
+        ''' list active domains
+        '''
+        rl = []
+        for d in self.domains():
+            rl.append(d.domain)
+        return rl
+
+    @property
     def active_domains(self)->List[Domain]:
         return self.domains()
 
