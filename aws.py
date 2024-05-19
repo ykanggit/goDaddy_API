@@ -1,5 +1,6 @@
 from typing import List
 import json
+from datetime import datetime
 
 import boto3
 from boto3.session import Session
@@ -425,7 +426,7 @@ class Route53(AWS):
                 for zone in page['HostedZones']:
                     if zone['Name'] == zone_name:
                         return zone['Id'].split('/')[-1]  # Zone ID found, return it
-            return ''  # Zone not found in any page
+            return None  # Zone not found in any page
         except Exception as e:
             logger.error(e)
             return None
@@ -457,3 +458,40 @@ class Route53(AWS):
         except Exception as e:
             logger.error(e)
         return None
+
+    def set_a_record(self, hosted_zone_id:str, record_name:str, new_value:str, comments:str=f'Updated at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'):
+        """
+        Args:
+            hosted_zone_id: The ID of the Route53 hosted zone.
+            record_name: The DNS name of the record to update (e.g., "www.example.com").
+            new_value: The new IP address value for the A record.
+        Returns:
+            A dictionary containing the response from Route53 on successful update, 
+            or None if update fails.
+        """
+        try:
+            # Define the change details
+            now:str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            change_batch = {
+                "Changes": [
+                    {
+                        "Action": "UPSERT",  # Update or create the record if it doesn't exist
+                        "ResourceRecordSet": {
+                            "Name": record_name,
+                            "Type": "A",
+                            "TTL": 300,  # Time to Live (seconds) - You can adjust this value
+                            "ResourceRecords": [
+                                {"Value": new_value}
+                            ]
+                        }
+                    }
+                ],
+                "Comment": comments
+            }
+
+            # Send the update request to Route53
+            response = self.client.change_resource_record_sets(HostedZoneId=hosted_zone_id, ChangeBatch=change_batch)
+            return response
+        except Exception as e:
+            logger.error(e)
+            return None
