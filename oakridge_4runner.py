@@ -1,7 +1,7 @@
 import requests
 import socket
 
-from loguru import logger
+from log import logger
 
 def my_public_ip() -> str:
   try:
@@ -24,6 +24,8 @@ def iplookup(hostname:str) ->str:
 
 if __name__ == "__main__":
   import sys
+  from log import linux_syslog
+  linux_syslog(sys.argv[0])
 
   hostname = '4runner.oakridge.io'
 
