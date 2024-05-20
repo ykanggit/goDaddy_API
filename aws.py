@@ -4,7 +4,7 @@ from datetime import datetime
 
 import boto3
 from boto3.session import Session
-from loguru import logger
+from log import logger
 
 
 
@@ -471,7 +471,6 @@ class Route53(AWS):
         """
         try:
             # Define the change details
-            now:str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             change_batch = {
                 "Changes": [
                     {
@@ -491,6 +490,7 @@ class Route53(AWS):
 
             # Send the update request to Route53
             response = self.client.change_resource_record_sets(HostedZoneId=hosted_zone_id, ChangeBatch=change_batch)
+            logger.debug(f'{record_name} new value {new_value}')
             return response
         except Exception as e:
             logger.error(e)

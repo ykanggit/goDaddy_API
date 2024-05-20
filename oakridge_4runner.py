@@ -39,15 +39,18 @@ if __name__ == "__main__":
     logger.error("fail get my public ip")
     exit(1)
     
+  from slack import Bot
+  b = Bot()
+
   if public_ip == dns_ip:
     logger.info(f'{hostname} dns ip {dns_ip} == my public ip {public_ip}')
     exit(0)
 
-  logger.info(f'updating {hostname} dns ip {dns_ip} -> {public_ip}')
-
   from aws import Route53
+  logger.info(f'updating {hostname} dns ip {dns_ip} -> {public_ip}')
 
   rt = Route53('yong.kang@iooi', 'us-west-2')
   zone_id = rt.get_zone_id_by_name('oakridge.io')
   result = rt.set_a_record(zone_id, hostname, public_ip)
-  logger.info(result)
+  if result:
+    b.send_dm_to_user('yong.kang', f'{hostname} IPv4 {dns_ip} -> {public_ip}')
